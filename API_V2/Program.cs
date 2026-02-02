@@ -34,6 +34,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseCors("Angularpolicy");
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
