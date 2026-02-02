@@ -63,8 +63,7 @@ namespace API_V2.Controllers
             await _connection.OpenAsync();
 
             using var command = new SqlCommand(query, _connection);
-            command.Parameters.AddWithValue("@ShipName", orders.ShipName);  
-            command.Parameters.AddWithValue("@ShipVia", orders.ShipVia);
+            command.Parameters.AddWithValue("@ShipName", (object?)orders.ShipName ?? DBNull.Value); command.Parameters.AddWithValue("@ShipVia", orders.ShipVia);
             command.Parameters.AddWithValue("@Freight", orders.Freight);
             command.CommandType = System.Data.CommandType.StoredProcedure;
             await command.ExecuteNonQueryAsync();
