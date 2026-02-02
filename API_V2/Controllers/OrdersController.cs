@@ -1,17 +1,26 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using API_V2.Models;
+using Microsoft.Identity.Client;
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace API_V2.Controllers
 {
-    [Route("api/[controller]")]
     [ApiController]
+    [Route("[controller]")]
     public class OrdersController : ControllerBase
     {
+        private readonly SqlConnection _connection;
+
+        public OrdersController(SqlConnection connection)
+        {
+            _connection = connection;
+        }
+
         // GET: api/<OrdersController>
         [HttpGet]
-        public IEnumerable<string> Get()
+
+        public async Task<IActionResult> Get()
         {
             return new string[] { "value1", "value2" };
         }
