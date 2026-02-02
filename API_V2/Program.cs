@@ -19,6 +19,12 @@ builder.Services.AddCors(option =>
                .AllowAnyHeader();
     });
 });
+
+builder.Services.AddScoped(_ => 
+new SqlConnection(builder.Configuration.GetConnectionString("conexion")
+    )
+);
+
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
