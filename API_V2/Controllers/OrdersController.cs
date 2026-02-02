@@ -22,7 +22,35 @@ namespace API_V2.Controllers
 
         public async Task<IActionResult> Get()
         {
-            return new string[] { "value1", "value2" };
+            var orders = new List<Orders>();
+            var query = "sp_obtener_orden";
+
+        await _connection.OpenAsync();
+            using (var command = new SqlCommand(query, _connection))
+            {
+                command.CommandType = System.Data.CommandType.StoredProcedure;
+                using (var reader = await command.ExecuteReaderAsync())
+                {
+                    while (await reader.ReadAsync())
+                    {
+                        var order = new Orders
+                        {
+                            OrderID = reader.GetInt32(reader.GetOrdinal("OrderID")),
+                            ShipName = reader.GetString(reader.GetOrdinal("ShipName")),
+                            ShipVia = reader.GetInt32(reader.GetOrdinal("ShipVia")),
+                            Freight = reader.GetDecimal(reader.GetOrdinal("Freight"))
+                        };
+                        orders.Add(order);
+                    }
+                }
+            }
+            await _connection.CloseAsync();
+            return Ok(new
+            {
+                exito = true,
+                message = "lista de ordenes",
+                data = orders
+            });
         }
 
         // GET api/<OrdersController>/5
