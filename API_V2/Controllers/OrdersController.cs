@@ -53,18 +53,29 @@ namespace API_V2.Controllers
             });
         }
 
-        // GET api/<OrdersController>/5
-        [HttpGet("{id}")]
-        public string Get(int id)
-        {
-            return "value";
-        }
 
         // POST api/<OrdersController>
         [HttpPost]
-        public void Post([FromBody] string value)
+        public async Task<IActionResult> Post([FromBody] Orders orders)
         {
+            var query = "sp_insertar_orden";
+
+            await _connection.OpenAsync();
+
+            using var command = new SqlCommand(query, _connection);
+            command.Parameters.AddWithValue("@ShipName", orders.ShipName);  
+            command.Parameters.AddWithValue("@ShipVia", orders.ShipVia);
+            command.Parameters.AddWithValue("@Freight", orders.Freight);
+            command.CommandType = System.Data.CommandType.StoredProcedure;
+            await command.ExecuteNonQueryAsync();
+            await _connection.CloseAsync();
+            return Ok(new
+            {
+                exito = true,
+                message = "orden insertada"
+            });
         }
+
 
         // PUT api/<OrdersController>/5
         [HttpPut("{id}")]
