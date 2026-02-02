@@ -35,6 +35,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseCors("Angularpolicy");
+
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
