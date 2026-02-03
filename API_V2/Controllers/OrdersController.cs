@@ -72,6 +72,35 @@ namespace API_V2.Controllers
             }
         }
 
+        [HttpGet("{id}")] // GET EXTRA PARA EL FORMULARIO DE EDITAR
+        public async Task<IActionResult> GetById(int id)
+        {
+            var query = "sp_obtener_orden_por_id";
+            Orders orden = null; // Usamos el modelo que ya tienes
+
+            await _connection.OpenAsync();
+            using var command = new SqlCommand(query, _connection);
+            command.CommandType = System.Data.CommandType.StoredProcedure;
+            command.Parameters.AddWithValue("@OrderID", id);
+
+            using var reader = await command.ExecuteReaderAsync();
+            if (await reader.ReadAsync())
+            {
+                orden = new Orders
+                {
+                    OrderID = reader.GetInt32(0),
+                    ShipName = reader.IsDBNull(1) ? "" : reader.GetString(1),
+                    ShipVia = reader.IsDBNull(2) ? 0 : reader.GetInt32(2),
+                    Freight = reader.GetDecimal(3)
+                };
+            }
+            await _connection.CloseAsync();
+
+            if (orden == null) return NotFound("Orden no encontrada");
+
+            // Retornamos el objeto directo para facilitar Angular
+            return Ok(orden);
+        }
 
         // POST api/<OrdersController>
         [HttpPost]
