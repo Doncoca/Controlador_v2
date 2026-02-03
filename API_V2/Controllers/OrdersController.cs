@@ -59,20 +59,34 @@ namespace API_V2.Controllers
         public async Task<IActionResult> Post([FromBody] Orders orders)
         {
             var query = "sp_insertar_orden";
-
-            await _connection.OpenAsync();
+            
+            try
+            {
+                await _connection.OpenAsync();
 
             using var command = new SqlCommand(query, _connection);
             command.Parameters.AddWithValue("@ShipName", (object?)orders.ShipName ?? DBNull.Value); command.Parameters.AddWithValue("@ShipVia", orders.ShipVia);
             command.Parameters.AddWithValue("@Freight", orders.Freight);
             command.CommandType = System.Data.CommandType.StoredProcedure;
             await command.ExecuteNonQueryAsync();
-            await _connection.CloseAsync();
-            return Ok(new
+                return Ok(new
+                {
+                    exito = true,
+                    message = "orden insertada"
+                });
+            }
+            catch (Exception ex)
             {
-                exito = true,
-                message = "orden insertada"
-            });
+                return StatusCode(500, new { exito = false, message = ex.Message });
+            }
+            finally
+            {
+
+                if (_connection.State == System.Data.ConnectionState.Open)
+                {
+                    await _connection.CloseAsync();
+                }
+            }
         }
 
 
