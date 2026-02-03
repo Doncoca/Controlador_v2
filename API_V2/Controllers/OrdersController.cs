@@ -124,7 +124,14 @@ namespace API_V2.Controllers
                 command.Parameters.AddWithValue("@ShipVia", orders.ShipVia);
                 command.Parameters.AddWithValue("@Freight", orders.Freight);
                 command.CommandType = System.Data.CommandType.StoredProcedure;
-                await command.ExecuteNonQueryAsync();
+
+                int filasAfectadas = await command.ExecuteNonQueryAsync();
+
+                if (filasAfectadas == 0) 
+                {
+                    return NotFound(new { exito = false, message = "No se encontró la orden con ese ID" });
+                }
+
                 return Ok(new
                 {
                     exito = true,
