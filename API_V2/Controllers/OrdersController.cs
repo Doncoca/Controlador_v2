@@ -24,7 +24,7 @@ namespace API_V2.Controllers
         {
             var orders = new List<Orders>();
             var query = "sp_obtener_orden";
-
+            try { 
         await _connection.OpenAsync();
             using (var command = new SqlCommand(query, _connection))
             {
@@ -44,13 +44,31 @@ namespace API_V2.Controllers
                     }
                 }
             }
-            await _connection.CloseAsync();
-            return Ok(new
+                return Ok(new
+                {
+                    exito = true,
+                    message = "lista de ordenes",
+                    data = orders
+                });
+            }
+            catch (Exception ex)
             {
-                exito = true,
-                message = "lista de ordenes",
-                data = orders
-            });
+
+                return StatusCode(500, new
+                {
+                    exito = false,
+                    message = "Error al obtener datos: " + ex.Message, 
+                    data = new List<Orders>() 
+                });
+            }
+            finally
+            {
+
+                if (_connection.State == System.Data.ConnectionState.Open)
+                {
+                    await _connection.CloseAsync();
+                }
+            }
         }
 
 
