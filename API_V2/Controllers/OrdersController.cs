@@ -110,8 +110,39 @@ namespace API_V2.Controllers
 
         // PUT api/<OrdersController>/5
         [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
+        public async Task<IActionResult>Put(int id, [FromBody] Orders orders)
+
         {
+
+            var query = "sp_modificar_orden";
+            try
+            {
+                await _connection.OpenAsync();
+                using var command = new SqlCommand(query, _connection);
+                command.Parameters.AddWithValue("@OrderID", id);
+                command.Parameters.AddWithValue("@ShipName", (object?)orders.ShipName ?? DBNull.Value);
+                command.Parameters.AddWithValue("@ShipVia", orders.ShipVia);
+                command.Parameters.AddWithValue("@Freight", orders.Freight);
+                command.CommandType = System.Data.CommandType.StoredProcedure;
+                await command.ExecuteNonQueryAsync();
+                return Ok(new
+                {
+                    exito = true,
+                    message = "orden modificada"
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { exito = false, message = ex.Message });
+            }
+            finally
+            {
+                if (_connection.State == System.Data.ConnectionState.Open)
+                {
+                    await _connection.CloseAsync();
+                }
+
+            }
         }
 
         // DELETE api/<OrdersController>/5
