@@ -2,6 +2,7 @@
 using Microsoft.Data.SqlClient;
 using API_V2.Models;
 using Microsoft.Identity.Client;
+using Microsoft.AspNetCore.Http.HttpResults;
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace API_V2.Controllers
@@ -152,10 +153,40 @@ namespace API_V2.Controllers
             }
         }
 
-        // DELETE api/<OrdersController>/5
         [HttpDelete("{id}")]
-        public void Delete(int id)
+        // 1. Quitamos [FromBody] Orders orders, solo dejamos el ID
+        public async Task<IActionResult> Delete(int id)
         {
+            var query = "sp_eliminar_orden";
+
+            try
+            {
+                await _connection.OpenAsync();
+                using var command = new SqlCommand(query, _connection);
+
+                command.CommandType = System.Data.CommandType.StoredProcedure;
+                command.Parameters.AddWithValue("@OrderID", id);
+
+                int rows = await command.ExecuteNonQueryAsync();
+
+                if (rows == 0)
+                {
+                    return NotFound(new { exito = false, message = "No existe esa orden" });
+                }
+
+                return Ok(new { exito = true, message = "Orden eliminada correctamente" });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { exito = false, message = ex.Message });
+            }
+            finally
+            {
+                if (_connection.State == System.Data.ConnectionState.Open)
+                {
+                    await _connection.CloseAsync();
+                }
+            }
         }
     }
 }
